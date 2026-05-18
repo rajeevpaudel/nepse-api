@@ -1,0 +1,11 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8088:8000"
+    env_file:
+      - .env
+    environment:
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+    restart: unless-stopped
+    mem_limit: 400m
