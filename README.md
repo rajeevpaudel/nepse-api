@@ -28,7 +28,7 @@ cp .env.example .env
 docker-compose up --build
 ```
 
-The API is available at `http://localhost:8088`.
+The API is available at `http://localhost:8000`.
 
 ### Local
 
@@ -88,7 +88,7 @@ Pulls the latest securities list from NEPSE and upserts into the database.
 ### `GET /securities/{symbol}/price`
 
 ```bash
-curl -H "X-API-Key: your-key" http://localhost:8088/securities/NABIL/price
+curl -H "X-API-Key: your-key" http://localhost:8000/securities/NABIL/price
 ```
 
 ```json
