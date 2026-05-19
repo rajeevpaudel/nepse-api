@@ -35,6 +35,27 @@ async def trigger_sync_securities(session: AsyncSession = Depends(get_session)):
     return {"status": "done", "synced": count}
 
 
+@router.get("/search")
+async def search_securities(
+    q: str = Query(..., min_length=1),
+    session: AsyncSession = Depends(get_session),
+):
+    result = await session.execute(
+        select(Security)
+        .where(
+            Security.is_active.is_(True),
+            or_(
+                Security.symbol.ilike(f"%{q}%"),
+                Security.name.ilike(f"%{q}%"),
+            ),
+        )
+        .order_by(Security.symbol)
+        .limit(20)
+    )
+    secs = result.scalars().all()
+    return [{"nepse_id": s.nepse_id, "symbol": s.symbol, "name": s.name} for s in secs]
+
+
 @router.get("/{symbol}/price")
 async def get_latest_price(
     symbol: str,
