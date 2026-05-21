@@ -1,11 +1,33 @@
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nepse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-nepse_db}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nepse} -d ${POSTGRES_DB:-nepse_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: .
     ports:
-      - "8088:8000"
+      - "8000:8000"
     env_file:
       - .env
     environment:
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-nepse}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-nepse_db}
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     mem_limit: 400m
+
+volumes:
+  db_data:

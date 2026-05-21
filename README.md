@@ -21,24 +21,37 @@ Read the full reverse engineering writeup in [`docs/blog.md`](docs/blog.md).
 
 ### Docker (recommended)
 
+Docker Compose starts both the API and a PostgreSQL database.
+
 ```bash
 cp .env.example .env
-# edit .env — set DATABASE_URL and API_KEY
+# edit .env — set POSTGRES_PASSWORD and API_KEY at minimum
+```
 
+```bash
 docker-compose up --build
 ```
 
-The API is available at `http://localhost:8000`.
+The API is available at `http://localhost:8088`.
+
+Data is persisted in a named Docker volume (`db_data`). To wipe it:
+
+```bash
+docker-compose down -v
+```
 
 ### Local
+
+Requires a running PostgreSQL instance (or use SQLite for quick testing).
 
 ```bash
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
+```
 
-export DATABASE_URL="sqlite+aiosqlite:///nepse.db"
+```bash
+export DATABASE_URL="sqlite+aiosqlite:///nepse.db"   # or a postgres URL
 export API_KEY="your-secret-key"
-export CACHE_DIR=".cache"
 
 uvicorn main:app --reload
 ```
@@ -47,10 +60,15 @@ uvicorn main:app --reload
 
 ## Environment variables
 
+When using Docker Compose, `DATABASE_URL` is constructed automatically from the Postgres variables — you only need to set it when connecting to an external database.
+
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `DATABASE_URL` | Yes | — | SQLAlchemy async URL (`postgresql+asyncpg://…` or `sqlite+aiosqlite:///…`) |
+| `POSTGRES_PASSWORD` | Yes (compose) | — | Password for the bundled PostgreSQL service |
+| `POSTGRES_USER` | No | `nepse` | PostgreSQL username |
+| `POSTGRES_DB` | No | `nepse_db` | PostgreSQL database name |
 | `API_KEY` | Yes | — | Value clients must send in `X-API-Key` header |
+| `DATABASE_URL` | External DB only | — | SQLAlchemy async URL (`postgresql+asyncpg://…` or `sqlite+aiosqlite:///…`) |
 | `CACHE_DIR` | No | `.cache` | Directory for WASM and SSL certificate cache |
 | `DEBUG_MODE` | No | `false` | Enables `/debug/*` endpoints |
 
@@ -169,7 +187,3 @@ Tests use an in-memory SQLite database and mock all external HTTP calls to NEPSE
 - The `css.wasm` file and intermediate CA are fetched from NEPSE's servers at runtime. If those URLs change, update `scraper/wasm_loader.py` and `scraper/ssl_bundle.py`.
 
 ---
-
-## License
-
-MIT
