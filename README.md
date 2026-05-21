@@ -32,7 +32,7 @@ cp .env.example .env
 docker-compose up --build
 ```
 
-The API is available at `http://localhost:8088`.
+The API is available at `http://localhost:8000`.
 
 Data is persisted in a named Docker volume (`db_data`). To wipe it:
 
@@ -92,6 +92,16 @@ Returns paginated list of active securities.
 [
   {"nepse_id": 123, "symbol": "NABIL", "name": "Nabil Bank Limited"},
   ...
+]
+```
+
+### `GET /securities/search?q=nabil`
+
+Search active securities by symbol or name (case-insensitive, returns up to 20 results).
+
+```json
+[
+  {"nepse_id": 123, "symbol": "NABIL", "name": "Nabil Bank Limited"}
 ]
 ```
 
