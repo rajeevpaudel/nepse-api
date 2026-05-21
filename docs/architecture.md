@@ -11,6 +11,7 @@ Client
 FastAPI app (main.py)
   │
   ├── /securities          →  DB query (SQLAlchemy + PostgreSQL/SQLite)
+  ├── /securities/search   →  DB query (symbol/name ilike)
   ├── /securities/sync     →  scraper/securities.py  →  NEPSE API
   ├── /securities/{}/price →  scraper/prices.py      →  NEPSE API
   └── /debug/run-market-open → services/scheduler.py
@@ -163,6 +164,6 @@ Market close (15:01 NST)
 
 ## Deployment
 
-The service runs as a single Docker container (no worker processes needed — all concurrency is async). A PostgreSQL container is not included in `docker-compose.yml` by default; point `DATABASE_URL` at an external instance or use `sqlite+aiosqlite:///nepse.db` for lightweight deployments.
+The service runs as a single Docker container (no worker processes needed — all concurrency is async). `docker-compose.yml` includes a `db` service running PostgreSQL 16. Data is persisted in a named volume (`db_data`). For lightweight local development without Docker, use `sqlite+aiosqlite:///nepse.db` as the `DATABASE_URL`.
 
 Memory ceiling is set to 400 MB in `docker-compose.yml`. Typical idle usage is ~80–120 MB.
